@@ -1,5 +1,10 @@
+.settings/org.eclipse.m2e.core.prefs
+*.classpath
+.settings/.jsdtscope
+*.project
+.settings/org.eclipse.jdt.core.prefs
+*.class
 ERServer.iml
-.idea
 /fitnesse/FitNesseRoot/ErServerTests/2*.zip
 /fitnesse/FitNesseRoot/*.zip
 /fitnesse/FitNesseRoot/RecentChanges.wiki
@@ -7,3 +12,8 @@ ERServer.iml
 /fitnesse/FitNesseRoot/files/
 /fitnesse/FitNesseRoot/TemplateLibrary/
 /fitnesse/FitNesseRoot/FrontPage/*.zip
+.settings/org.eclipse.wst.jsdt.ui.superType.name
+*.prefs
+.settings/org.eclipse.wst.common.component
+.settings/org.eclipse.wst.jsdt.ui.superType.container
+.settings/org.eclipse.wst.common.project.facet.core.xml
