@@ -1,18 +1,17 @@
 package erserver.modules.testtypes;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ChildClassificationTest {
 
    private LocalDate currentDate;
 
-
-   @Before
+   @BeforeEach
    public void setUp() {
       currentDate = LocalDate.of(2000, 1, 10);
    }

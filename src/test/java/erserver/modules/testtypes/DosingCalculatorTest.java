@@ -1,18 +1,19 @@
 package erserver.modules.testtypes;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class DosingCalculatorTest {
 
     private DosingCalculator dosingCalculator;
     private Patient patient;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         dosingCalculator = new DosingCalculator();
         patient = new Patient();
@@ -46,15 +47,27 @@ public class DosingCalculatorTest {
         assertEquals("15 mg/kg", singleDose);
     }
 
-    @Test(expected = RuntimeException.class)
-    public void returnsExceptionForAdults() {
-        patient.setBirthDate(LocalDate.now().minusYears(16));
-        dosingCalculator.getRecommendedSingleDose(patient, "Amoxicillin Oral Suspension");
+    @Test()
+    public void returnsExceptionForAdults() 
+    {
+        assertThrows(RuntimeException.class, () -> exceptionForAdults(), "Expected exceptionForAdults() to throw, but it didn't");
     }
 
-    @Test(expected = RuntimeException.class)
-    public void returnsNullForUnrecognizedMedication() {
-        patient.setBirthDate(LocalDate.now().minusYears(16));
-        dosingCalculator.getRecommendedSingleDose(patient, "No Such Med");
+	private void exceptionForAdults()
+	{
+		patient.setBirthDate(LocalDate.now().minusYears(16));
+        dosingCalculator.getRecommendedSingleDose(patient, "Amoxicillin Oral Suspension");
+	}
+
+    @Test()
+    public void returnsNullForUnrecognizedMedication() 
+    {
+        assertThrows(RuntimeException.class, () -> nullForUnrecognizedMedication(), "Expected nullForUnrecognizedMedication() to throw, but it didn't");
     }
+
+	private void nullForUnrecognizedMedication()
+	{
+		patient.setBirthDate(LocalDate.now().minusYears(16));
+        dosingCalculator.getRecommendedSingleDose(patient, "No Such Med");
+	}
 }
