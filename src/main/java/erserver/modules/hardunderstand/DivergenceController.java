@@ -9,81 +9,76 @@ import java.util.List;
 
 public class DivergenceController {
 
-   private static final String ADMIN_ON_CALL_DEVICE = "111-111-1111";
+	private static final String ADMIN_ON_CALL_DEVICE = "111-111-1111";
+	
+	private boolean redDivergence;
+	private boolean yellowDivergence;
+	private boolean greenDivergence;
+	private int redCount;
+	private int yellowCount;
+	private int greenCount;
+	private int allowedCount;
+	private int redBedOverflowAllowed;
+	private int yellowBedOverflowAllowed;
+	private int greenBedOverflowAllowed;
 
-   private boolean redDivergence;
-   private boolean yellowDivergence;
-   private boolean greenDivergence;
-   private int redCount;
-   private int yellowCount;
-   private int greenCount;
-   private int allowedCount;
-   private int redOver;
-   private int yellowOver;
-   private int greenOver;
+	public DivergenceController() {
+		this.redDivergence = false;
+		this.yellowDivergence = false;
+		this.greenDivergence = false;
+		this.redCount = 0;
+		this.yellowCount = 0;
+		this.greenCount = 0;
+		this.allowedCount = 3;
+		this.redBedOverflowAllowed = 0;
+		this.yellowBedOverflowAllowed = 1;
+		this.greenBedOverflowAllowed = 4;
+	}
 
-   public DivergenceController() {
-      this.redDivergence = false;
-      this.yellowDivergence = false;
-      this.greenDivergence = false;
-      this.redCount = 0;
-      this.yellowCount = 0;
-      this.greenCount = 0;
-      this.allowedCount = 3;
-      this.redOver = 0;
-      this.yellowOver = 1;
-      this.greenOver = 4;
-   }
-
-   public void check() {
+	public void check() {
       StaffAssignmentManager manager = new ERServerMainController().getStaffAssignmentManager();
       InboundPatientController controller = new ERServerMainController().getInboundPatientController();
-      int[] red = {1, 2};
-      int[] yellow = {1, 1};
-      int[] green = {0, 1};
+      int[] redStaffRequired = {1, 2};
+      int[] yellowStaffRequired = {1, 1};
+      int[] greenStaffRequired = {0, 1};
       boolean redIncremented = false;
       boolean yellowIncremented = false;
       boolean greenIncremented = false;
       List<Patient> patients = controller.currentInboundPatients();
       List<Staff> staff = manager.getAvailableStaff();
       List<Bed> beds = manager.getAvailableBeds();
-      int bedcrits = 0;
-      int redin = 0;
-      int yellowin = 0;
-      int greenin = 0;
-      int[] staffcur = {0, 0};
-      int[] need = {0, 0};
+      int redInboundCount = 0;
+      int yellowInboundCount = 0;
+      int greenInboundCount = 0;
+      int[] availableStaff = {0, 0};
 
-      for (Bed bed : beds) {
-         if (bed.isCriticalCare()) {
-            bedcrits ++;
-         }
-      }
+      int criticalBedsAvailable = calculateCriticalBedsAvailable(beds);
+      
       for (Patient patient : patients) {
          if (Priority.RED.equals(patient.getPriority())) {
-            redin++;
+            redInboundCount++;
          }
          else if (Priority.YELLOW.equals(patient.getPriority())) {
-            yellowin ++;
+            yellowInboundCount ++;
          }
          else if (Priority.GREEN.equals(patient.getPriority())) {
-            greenin ++;
+            greenInboundCount ++;
          }
       }
       for (Staff cur : staff) {
          if (StaffRole.DOCTOR.equals(cur.getRole())) {
-            staffcur[0]++;
+            availableStaff[0]++;
          }
          else if (StaffRole.NURSE.equals(cur.getRole())) {
-            staffcur[1]++;
+            availableStaff[1]++;
          }
       }
-      if (redin > (bedcrits + redOver)) {
+      if (redInboundCount > (criticalBedsAvailable + redBedOverflowAllowed)) {
          redCount++;
          redIncremented = true;
       }
-      if (yellowin + greenin > (beds.size() - bedcrits + yellowOver + greenOver)) {
-         if ( (greenin > (beds.size() - bedcrits + greenOver)) && (yellowin <= (beds.size() - bedcrits + yellowOver)) ) {
+      if (yellowInboundCount + greenInboundCount > (beds.size() - criticalBedsAvailable + yellowBedOverflowAllowed + greenBedOverflowAllowed)) {
+         if ( (greenInboundCount > (beds.size() - criticalBedsAvailable + greenBedOverflowAllowed)) && (yellowInboundCount <= (beds.size() - criticalBedsAvailable + yellowBedOverflowAllowed)) ) {
             greenCount++;
             greenIncremented = true;
          } else {
@@ -93,22 +88,20 @@ public class DivergenceController {
             yellowIncremented = true;
          }
       }
-      need[0] = redin * red[0];
-      need[0] += yellowin * yellow[0];
-      need[0] += greenin * green[0];
-      need[1] = redin * red[1];
-      need[1] += yellowin * yellow[1];
-      need[1] += greenin * green[1];
-      if (need[0] > staffcur[0]) {
-         int diff = need[0] - staffcur[0];
-         if ((greenin * green[0]) >= diff)  {
+      
+      int[] neededStaff = calculateNeededStaff(redStaffRequired, yellowStaffRequired, greenStaffRequired, redInboundCount,
+			yellowInboundCount, greenInboundCount);
+       
+      if (neededStaff[0] > availableStaff[0]) {
+         int diff = neededStaff[0] - availableStaff[0];
+         if ((greenInboundCount * greenStaffRequired[0]) >= diff)  {
             if (!greenIncremented) {
                greenIncremented = true;
                greenCount++;
             }
          }
          else {
-            int both = (yellowin * yellow[0]) + (greenin * green[0]);
+            int both = (yellowInboundCount * yellowStaffRequired[0]) + (greenInboundCount * greenStaffRequired[0]);
             if (both >= diff) {
                if (!greenIncremented) {
                   greenIncremented = true;
@@ -135,16 +128,16 @@ public class DivergenceController {
             }
          }
       }
-      if (need[1] > staffcur[1]) {
-         int diff = need[1] - staffcur[1];
-         if ((greenin * green[1]) >= diff)  {
+      if (neededStaff[1] > availableStaff[1]) {
+         int diff = neededStaff[1] - availableStaff[1];
+         if ((greenInboundCount * greenStaffRequired[1]) >= diff)  {
             if (!greenIncremented) {
                greenIncremented = true;
                greenCount++;
             }
          }
          else {
-            int both = (yellowin * yellow[1]) + (greenin * green[1]);
+            int both = (yellowInboundCount * yellowStaffRequired[1]) + (greenInboundCount * greenStaffRequired[1]);
             if (both >= diff) {
                if (!greenIncremented) {
                   greenIncremented = true;
@@ -217,21 +210,42 @@ public class DivergenceController {
             greenDivergence = false;
          }
       }
-   }
+	}
 
-   private void sendDivergencePage(String text, boolean requireAck) {
-      try {
-         PagerTransport transport = PagerSystem.getTransport();
-         transport.initialize();
-         if (requireAck) {
-            transport.transmitRequiringAcknowledgement(ADMIN_ON_CALL_DEVICE, text);
-         } else {
-            transport.transmit(ADMIN_ON_CALL_DEVICE, text);
-         }
-      } catch (Throwable t) {
-         t.printStackTrace();
-      }
+	private int[] calculateNeededStaff(int[] redStaffRequired, int[] yellowStaffRequired, int[] greenStaffRequired,
+			int redInboundCount, int yellowInboundCount, int greenInboundCount) {
+		int[] neededStaff = {0, 0};      
+		  neededStaff[0] = redInboundCount * redStaffRequired[0];
+		  neededStaff[0] += yellowInboundCount * yellowStaffRequired[0];
+		  neededStaff[0] += greenInboundCount * greenStaffRequired[0];
+		  neededStaff[1] = redInboundCount * redStaffRequired[1];
+		  neededStaff[1] += yellowInboundCount * yellowStaffRequired[1];
+		  neededStaff[1] += greenInboundCount * greenStaffRequired[1];
+		return neededStaff;
+	}
 
-   }
+	private int calculateCriticalBedsAvailable(List<Bed> beds) {
+		int criticalBedsAvailable = 0;      
+		for (Bed bed : beds) {
+			if (bed.isCriticalCare()) {
+				criticalBedsAvailable ++;
+			}
+		}
+		return criticalBedsAvailable;
+	}
+
+	private void sendDivergencePage(String text, boolean requireAck) {
+		try {
+			PagerTransport transport = PagerSystem.getTransport();
+			transport.initialize();
+			if (requireAck) {
+				transport.transmitRequiringAcknowledgement(ADMIN_ON_CALL_DEVICE, text);
+			} else {
+				transport.transmit(ADMIN_ON_CALL_DEVICE, text);
+			}
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+	}
 
 }
