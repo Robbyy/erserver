@@ -14,7 +14,6 @@ public class EmergencyResponseService {
    public EmergencyResponseService(String url, int port, int timeout) {
       this.connectionString = url + ":" + port;
       this.timeout = timeout;
-      boolean acknowledge = false;
       String response = null;
       System.out.println("Initializing with Emergency Response Services: " + connectionString + "/ack");
       try {
