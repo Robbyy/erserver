@@ -1,11 +1,18 @@
 package erserver.modules.hardunderstand;
 
-import erserver.modules.dependencies.*;
+import java.util.List;
+
+import erserver.modules.dependencies.Bed;
+import erserver.modules.dependencies.ERServerMainController;
+import erserver.modules.dependencies.EmergencyResponseService;
+import erserver.modules.dependencies.InboundPatientController;
+import erserver.modules.dependencies.Priority;
+import erserver.modules.dependencies.Staff;
+import erserver.modules.dependencies.StaffAssignmentManager;
+import erserver.modules.dependencies.StaffRole;
 import erserver.modules.dependencies.vendorpagersystem.PagerSystem;
 import erserver.modules.dependencies.vendorpagersystem.PagerTransport;
 import erserver.modules.testtypes.Patient;
-
-import java.util.List;
 
 public class DivergenceController {
 

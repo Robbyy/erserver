@@ -1,11 +1,11 @@
 package erserver.modules.dependencies;
 
-import erserver.modules.dependencies.vendorpagersystem.PagerTransport;
-import erserver.modules.testtypes.Patient;
-import erserver.modules.dependencies.vendorpagersystem.PagerSystem;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import erserver.modules.dependencies.vendorpagersystem.PagerSystem;
+import erserver.modules.dependencies.vendorpagersystem.PagerTransport;
+import erserver.modules.testtypes.Patient;
 
 public class AlertScanner {
 
